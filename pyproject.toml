@@ -5,10 +5,14 @@ description = "Recommender System"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
+    "gdown>=5.2.0",
+    "kmeans-pytorch>=0.3",
     "matplotlib>=3.10.6",
     "numpy>=2.3.3",
     "pandas>=2.3.2",
     "python-dotenv>=1.1.1",
+    "ray>=2.49.2",
+    "recbole>=1.2.0",
     "scikit-learn>=1.7.2",
     "seaborn>=0.13.2",
     "torch>=2.8.0",
