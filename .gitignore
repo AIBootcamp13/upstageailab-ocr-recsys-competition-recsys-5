@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+data/
+log/
+log_tensorboard/
+recbole_data/
+saved/
+*.gz
+
 # Distribution / packaging
 .Python
 build/
