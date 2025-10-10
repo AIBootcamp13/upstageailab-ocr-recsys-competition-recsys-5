@@ -1,6 +1,29 @@
 import pandas as pd
 import os
 
+def add_feature(train_df):
+
+    # 필요한 컬럼만 추출
+    data = train_df[['user_id', 'item_id', 'event_type', 'event_time']]
+    # event_time 오름차순 정렬
+    data = data.sort_values(['user_id', 'item_id', 'event_time'])
+
+    # 'view' 이벤트만 1, 나머지는 0으로 표시
+    data['is_view'] = (data['event_type'] == 'view').astype(int)
+
+    # 사용자-아이템별로 시간순 누적합
+    data['view_cnt'] = data.groupby(['user_id', 'item_id'])['is_view'].cumsum()
+
+    train_df = train_df.merge(
+        data[['user_id', 'item_id', 'event_time', 'view_cnt']],
+        on=['user_id', 'item_id', 'event_time'],
+        how='left'
+    )
+
+    print(train_df.head())
+
+    return train_df
+
 def main():
 
     # 데이터를 로딩.
@@ -28,8 +51,13 @@ def main():
 
     train_df = train_df.dropna().reset_index(drop=True)
 
+
+    # 특징 필드 추가
+    train_df = add_feature(train_df)   
+
+
     # recbole 형식으로 컬럼명 변경
-    recbole_df = train_df.rename(columns={'user_idx': 'user_idx:token', 'item_idx': 'item_idx:token', 'user_session': 'user_session:token', 'event_time': 'event_time:float', 'event_type': 'event_type:token'})
+    recbole_df = train_df.rename(columns={'user_idx': 'user_idx:token', 'item_idx': 'item_idx:token', 'user_session': 'user_session:token', 'event_time': 'event_time:float', 'event_type': 'event_type:token', 'view_cnt': 'view_cnt:float'})
 
     # 디렉토리 생성
     os.makedirs('./data/sasrec_data', exist_ok=True)
@@ -38,7 +66,7 @@ def main():
     train_df.to_csv('./data/prepared_df.csv', sep='\t',index=None)
 
     # 전처리 데이터 저장
-    recbole_df[['user_idx:token', 'item_idx:token', 'user_session:token', 'event_time:float', 'event_type:token']].to_csv('./data/sasrec_data/sasrec_data.inter', sep='\t',index=None)
+    recbole_df[['user_idx:token', 'item_idx:token', 'user_session:token', 'event_time:float', 'event_type:token', 'view_cnt:float']].to_csv('./data/sasrec_data/sasrec_data.inter', sep='\t',index=None)
 
     # item 파일용 작업
     item_df['item_idx'] = item_df['item_id'].map(item2idx)
